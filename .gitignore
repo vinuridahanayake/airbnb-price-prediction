@@ -1,0 +1,18 @@
+# Raw dataset is 101 MB (over GitHub's 100 MB limit): the repo ships Airbnb_Data.zip instead
+Airbnb_Data.csv
+
+# Python / Jupyter
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.venv/
+venv/
+
+# Scratch work
+tmp/
+_smoke_*.ipynb
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/

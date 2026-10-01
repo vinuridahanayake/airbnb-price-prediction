@@ -1,0 +1,10 @@
+# Tested with Python 3.13. Install with:  pip install -r requirements.txt
+pandas>=3.0
+numpy>=2.0
+matplotlib>=3.9
+seaborn>=0.13
+scipy>=1.13
+scikit-learn>=1.9      # TargetEncoder(cv=KFold(...)) needs 1.9+
+joblib>=1.4
+xgboost>=2.1           # Stage 6-7 model (tested with 3.2)
+jupyter

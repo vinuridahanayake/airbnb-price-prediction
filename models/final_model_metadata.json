@@ -1,0 +1,59 @@
+{
+  "model": "XGBoost",
+  "estimator": "XGBRegressor",
+  "feature_set": "listing",
+  "target": "log_price (natural log of US$ per night); predict with np.exp(model.predict(X))",
+  "input": "DataFrame produced by src.preprocessing.clean_and_engineer(raw_listing_rows)",
+  "form_fields": [
+    "city",
+    "neighbourhood",
+    "latitude",
+    "longitude",
+    "room_type",
+    "property_type",
+    "accommodates",
+    "bathrooms",
+    "bedrooms",
+    "beds",
+    "bed_type",
+    "amenities",
+    "cancellation_policy",
+    "cleaning_fee",
+    "instant_bookable"
+  ],
+  "hyperparameters": {
+    "colsample_bytree": 0.4836963163912251,
+    "learning_rate": 0.022059149678071027,
+    "max_depth": 10,
+    "min_child_weight": 15,
+    "n_estimators": 1257,
+    "reg_alpha": 0.00397211072738191,
+    "reg_lambda": 1.524996572521356,
+    "subsample": 0.836965827544817
+  },
+  "cv_metrics_train": {
+    "RMSE (log)": 0.38343314533608036,
+    "R\u00b2": 0.7156617757064796,
+    "MAE ($)": 48.61660445167202,
+    "within \u00b125% (%)": 58.41415124658406
+  },
+  "test_metrics": {
+    "RMSE (log)": 0.3807907537017371,
+    "MAE (log)": 0.27153901044945244,
+    "R\u00b2": 0.7113873216755785,
+    "MAE ($)": 47.808094791713984,
+    "MedAE ($)": 21.525221180079207,
+    "MAPE (%)": 28.23079153054015,
+    "within \u00b125% (%)": 59.121576035622724
+  },
+  "train_rows": 59287,
+  "test_rows": 14822,
+  "trained_on": "2026-10-01",
+  "versions": {
+    "python": "3.14.0",
+    "scikit-learn": "1.9.1",
+    "xgboost": "3.2.0",
+    "pandas": "3.0.2",
+    "numpy": "2.4.4"
+  }
+}

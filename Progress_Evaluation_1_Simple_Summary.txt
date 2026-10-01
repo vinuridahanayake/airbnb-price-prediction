@@ -1,0 +1,174 @@
+IT3051 FUNDAMENTALS OF DATA MINING
+PROGRESS EVALUATION 1 - SIMPLE PROJECT SUMMARY
+
+Project: Airbnb Listing Price Prediction
+Group: Mine4Data (DS.Y3S2.01.01)
+
+This document compares the assignment brief with the files currently in the project folder.
+
+
+1. WHAT PROGRESS EVALUATION 1 REQUIRES
+
+For Progress Evaluation 1, every student must understand and explain:
+
+- The real-world problem and the purpose of the project.
+- Why the dataset was selected and whether it was approved by the instructor.
+- The dataset size, columns, target variable, and machine learning task.
+- The main EDA findings.
+- Missing values, duplicates, invalid values, and outliers.
+- The preprocessing methods and the reasons for using them.
+- Feature engineering and feature selection.
+- Data leakage risks and how they were prevented.
+- The student's own contribution to the group project.
+
+Progress Evaluation 1 only covers the work up to preprocessing. Training four final models, hyperparameter tuning, backend development, frontend development, the final report, and the final presentation belong to later stages.
+
+
+2. WHAT HAS BEEN DONE
+
+A. Problem and dataset understanding
+
+- The project predicts the nightly price of an Airbnb listing.
+- The target is log_price, which is the natural logarithm of the price in US dollars.
+- This is a supervised regression problem because the output is a number.
+- The main intended user is an Airbnb host who wants help choosing a suitable price.
+- The dataset contains 74,111 rows and 29 original columns.
+- The dataset is described as the Airbnb Price Dataset from Rana on Kaggle.
+
+B. Exploratory Data Analysis (01_EDA_Airbnb.ipynb)
+
+- The structure of the dataset and the meaning of the columns were studied.
+- Numeric, categorical, Boolean, date, text, identifier, and target columns were identified.
+- Incorrect stored data types were found, such as percentages and true/false values stored as text.
+- Missing values were counted and studied. Twelve columns contain missing values.
+- The largest amounts of missing data are in host response rate, review score, first review, last review, thumbnail URL, and neighbourhood.
+- The reasons for some missing values were investigated. For example, review information is usually missing because a listing has no reviews.
+- Exact duplicates, duplicate IDs, and near-duplicates were checked. No duplicate listing rows were found.
+- Invalid or suspicious values were checked. Two listings had impossible prices below $10, 198 rows had zero bathrooms, and four rows had zero beds.
+- The target distribution was studied. Normal price is very skewed, but log_price is much more balanced and is better for modelling.
+- Numeric feature distributions and outliers were studied.
+- Categorical and Boolean feature distributions were studied.
+- Relationships between the input features and price were studied.
+- Important findings include:
+  - The number of guests a listing can accommodate is a strong price factor.
+  - Room type is the strongest categorical price factor.
+  - Neighbourhood and city are important.
+  - Distance from the city centre is useful in most cities.
+  - Amenities contain useful information but require cleaning.
+- Possible data leakage was identified. Review history is not available for a new listing, and learned preprocessing must use training data only.
+- A final EDA summary connects each finding to a preprocessing or modelling decision.
+
+C. Data preprocessing and feature engineering (02_Preprocessing_Airbnb.ipynb and src/preprocessing.py)
+
+- Six unsuitable columns were removed from modelling: id, name, description, thumbnail_url, zipcode, and host_has_profile_pic.
+- The two listings with prices below $10 were removed, leaving 74,109 valid rows.
+- Zero bathrooms and zero beds were changed to missing values so they can be imputed.
+- Text percentages, true/false values, dates, and amenities were converted into useful formats.
+- New features were created, including:
+  - guests per bedroom
+  - beds per guest
+  - guests per bathroom
+  - studio indicator
+  - real-bed indicator
+  - amenity count and cleaned amenity list
+  - distance from the city centre
+  - host tenure
+  - listing age
+  - days since the last review
+  - review and missing-value indicators
+- Neighbourhood names were combined with city names to avoid mixing places with the same name in different cities.
+- The valid data was split into 80% training data and 20% test data.
+- The split was stratified by price groups and uses random_state 42, so every group member can reproduce the same split.
+- All learned preprocessing is fitted on the training data only.
+- Missing neighbourhoods are filled using nearby training listings. Other numeric values use the training median, and categorical or Boolean values use suitable training-based rules.
+- Outliers are kept because many represent real large properties. Extreme numeric values are capped only for linear models.
+- Low-cardinality categories use one-hot encoding.
+- Rare property types are grouped as Other.
+- Neighbourhood uses smoothed, cross-fitted target encoding.
+- Amenities use multi-hot encoding, keeping common amenities.
+- Numeric features are scaled for linear models but not for tree models.
+- Near-constant and highly correlated features are removed where appropriate.
+- Separate preprocessing pipelines were prepared for linear models and tree models.
+- Separate listing-only and full feature sets were prepared. The listing-only set is suitable for a new-host prediction system because it does not need later review history.
+- A leakage checklist and a numerical leakage example are included.
+- The cleaned train/test files, fixed split IDs, fitted preprocessors, and feature-name lists were saved for later modelling.
+- The notebooks contain saved outputs and no recorded error cells were found during this review.
+
+
+3. PARTS THAT ARE NOT STRICTLY COMPULSORY FOR PROGRESS EVALUATION 1
+
+The assignment says students must not limit their work only to the listed points. Therefore, it is good to keep some extra analysis. However, the following items are extra and can be shortened if the viva or notebook is too long.
+
+Safe items to shorten or remove:
+
+- The detailed free-text analysis of name, description, and thumbnail_url. A short reason for dropping these columns is enough.
+- The KNN neighbourhood accuracy experiment. The imputation method must be explained, but the full 95.5% accuracy experiment is extra evidence.
+- The target-encoding shrinkage graph.
+- The cross-validation table used to choose the target-encoding smoothing value.
+- The mutual-information ranking, because it was mainly used as supporting evidence and did not remove features.
+- The numerical demonstration comparing leaky and safe preprocessing. The leakage explanation and prevention checklist are compulsory, but this extra experiment is not.
+- The end-to-end Ridge and HistGradientBoosting sanity check. Model evaluation belongs mainly to Progress Evaluation 2.
+- The raw-versus-cleaned amenity evidence table. The amenity cleaning decision must remain, but this detailed proof is optional.
+- Repeated or very similar charts. The brief requires important visualisations, not every possible chart.
+- Saving every chart as a separate PNG. This is useful for the report and presentation but is not a direct Evaluation 1 requirement.
+- Saving four fitted preprocessing joblib files and feature_names.json. These are useful for later modelling and the final system but are not required in the Evaluation 1 viva.
+
+Useful extra items that are not named directly in the brief, but should only be removed with care:
+
+- Multicollinearity and interaction analysis. This supports the later choice of Ridge/Lasso and ratio features.
+- Geographical maps and distance-to-centre analysis. Keep this if dist_centre_km remains as a feature.
+- Detailed amenities analysis. Keep enough evidence if amenity features remain in the model.
+- Date analysis. Keep enough evidence if host tenure, listing age, or review-recency features remain.
+- Engineered-feature correlation evidence. Keep enough evidence to explain why the new ratio and distance features were created.
+- The four preprocessing variants. The assignment does not demand four preprocessing pipelines, but they support different model families and compare deployable listing data with review-history data.
+
+Do not remove the following compulsory core work:
+
+- Dataset structure and variable types.
+- Missing-value analysis.
+- Duplicate checking.
+- Invalid-value and outlier investigation.
+- Important distributions and feature-target relationships.
+- The target-variable explanation.
+- Data leakage identification and prevention.
+- Cleaning and imputation decisions.
+- Categorical encoding.
+- Scaling where required.
+- Feature engineering and feature selection.
+- Train/test separation before learned preprocessing.
+- Clear reasons for all important preprocessing decisions.
+- A short summary connecting EDA findings to preprocessing decisions.
+
+
+4. ITEMS THAT ARE NOT REQUIRED YET
+
+The following stages are compulsory for the full project, but they were not required for Progress Evaluation 1:
+
+- Comparing at least four machine learning algorithms.
+- Full model evaluation and comparison.
+- Hyperparameter tuning and final model selection.
+- Backend development.
+- Frontend development.
+- The completed technical report.
+- The final presentation and system demonstration.
+
+
+5. IMPORTANT GAPS OR THINGS TO CONFIRM
+
+- The assignment requires instructor validation before EDA and preprocessing. Project_Sections_Guide.md mentions FDM_Dataset_Proposal.pdf, but that file is not currently present in this project folder. Keep the approved proposal and validation evidence ready for the viva.
+- The exact dataset URL and a proper citation should be shown. The notebook says Rana, Kaggle, but the proposal or another project document should contain the full source link and citation.
+- The assignment asks each student to explain their own contribution. No contribution list was found in the current project files. The group should write down who completed which parts.
+- Every member must understand the complete work, even if the tasks were divided between group members.
+- Confirm that the dataset was actually approved by the instructor. The files alone cannot prove that approval happened.
+
+
+6. SHORT VIVA EXPLANATION
+
+Our project predicts an Airbnb listing's nightly price. We used a public Airbnb dataset with 74,111 rows and 29 columns. The target is log_price, so the task is regression. During EDA, we studied data types, missing values, duplicates, invalid values, outliers, distributions, and the relationships between listing details and price. We found that room type, capacity, location, and amenities are important. We also found two impossible prices and some invalid zero values.
+
+For preprocessing, we removed unsuitable columns and the two invalid price rows. We cleaned data types, handled missing values, encoded categories and amenities, created useful features such as guests per bathroom and distance from the city centre, and selected useful features. We split the data into training and test sets before fitting any learned preprocessing. This prevents information from the test set from leaking into training. We prepared different pipelines for linear and tree models and saved the processed data for the next stage.
+
+
+7. OVERALL RESULT
+
+The technical EDA and preprocessing work needed for Progress Evaluation 1 has been completed in detail. Some experiments and charts go beyond what is strictly compulsory and can be shortened. Before the viva, the group should make sure that the instructor approval evidence, complete dataset citation, and each member's contribution statement are available.
