@@ -16,8 +16,8 @@ import numpy as np
 import pandas as pd
 from sklearn.base import BaseEstimator, TransformerMixin, clone
 from sklearn.dummy import DummyRegressor
-from sklearn.ensemble import HistGradientBoostingRegressor, RandomForestRegressor
-from sklearn.linear_model import Lasso, LinearRegression, Ridge
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.linear_model import LinearRegression, Ridge
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.model_selection import KFold
 from sklearn.neighbors import KNeighborsRegressor
@@ -30,20 +30,16 @@ RANDOM_STATE = pp.RANDOM_STATE
 # One fixed 5-fold split of the TRAINING set, shared by every model and every search -> paired, fair comparison
 CV = KFold(5, shuffle=True, random_state=RANDOM_STATE)
 
-# name -> (preprocessing kind, family, factory). Stage 6 settings are library defaults, except where a
-# default is unusable for this data (noted inline); Stage 7 tunes them.
+# name -> (preprocessing kind, family, factory). Five algorithms from four families (plus a mean baseline as a
+# reference). Stage 6 settings are library defaults, except where noted inline; Stage 7 tunes them.
 MODELS = {
     "Mean baseline": ("tree", "baseline", lambda: DummyRegressor(strategy="mean")),
     "Linear Regression": ("linear", "linear", lambda: LinearRegression()),
     "Ridge": ("linear", "linear", lambda: Ridge(alpha=1.0)),
-    # default alpha = 1.0 zeroes every coefficient (target std is only 0.72 log units)
-    "Lasso": ("linear", "linear", lambda: Lasso(alpha=0.001, max_iter=5000)),
     "KNN": ("linear", "instance-based", lambda: KNeighborsRegressor(n_neighbors=5, n_jobs=-1)),
     # max_features = 1/3 is Breiman's recommendation for regression forests (the default 1.0 is ~3x slower)
     "Random Forest": ("tree", "bagging ensemble", lambda: RandomForestRegressor(
         n_estimators=200, max_features=1 / 3, n_jobs=-1, random_state=RANDOM_STATE)),
-    "HistGradientBoosting": ("tree", "boosting ensemble", lambda: HistGradientBoostingRegressor(
-        random_state=RANDOM_STATE)),
     "XGBoost": ("tree", "boosting ensemble", lambda: XGBRegressor(
         tree_method="hist", n_jobs=-1, random_state=RANDOM_STATE)),
 }

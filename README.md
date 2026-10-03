@@ -12,7 +12,7 @@ Predicts the nightly price of an Airbnb listing (target: `log_price`, a regressi
 |---|---|---|
 | 3 – EDA | `01_EDA_Airbnb.ipynb` | Structure, data quality, distributions, relationships, leakage risks |
 | 4 – Preprocessing | `02_Preprocessing_Airbnb.ipynb`, `src/preprocessing.py` | Cleaning, train/test split, imputation, encoding, scaling, feature engineering and selection |
-| 6 – Modelling | `03_Modelling_Airbnb.ipynb`, `src/modelling.py` | 7 algorithms compared with 5-fold CV |
+| 6 – Modelling | `03_Modelling_Airbnb.ipynb`, `src/modelling.py` | 5 algorithms (Linear Regression, Ridge, KNN, Random Forest, XGBoost) compared with 5-fold CV |
 | 7 – Optimisation | `04_Optimisation_Airbnb.ipynb` | Tuning, ablation and feature-selection experiments, final model, test evaluation |
 
 Viva preparation: `Progress_Evaluation_1_Simple_Summary.txt`, `Project_Sections_Guide.md` (Evaluation 1) and `Progress_Evaluation_2_Guide.md` (Evaluation 2).
