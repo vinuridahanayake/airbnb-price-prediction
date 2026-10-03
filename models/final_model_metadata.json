@@ -48,7 +48,7 @@
   },
   "train_rows": 59287,
   "test_rows": 14822,
-  "trained_on": "2026-10-01",
+  "trained_on": "2026-10-03",
   "versions": {
     "python": "3.14.0",
     "scikit-learn": "1.9.1",

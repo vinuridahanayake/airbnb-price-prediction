@@ -32,7 +32,7 @@ All notebooks are saved with their outputs, so you can read them without running
 
 ## Re-running
 
-Run the notebooks in order (01 → 02 → 03 → 04). Each one reads files written by the one before. Approximate run times on a 16-thread laptop: 03 ≈ 25 min, 04 ≈ 75–90 min. Keep the computer plugged in and stop it from sleeping during long runs. All steps use `random_state = 42`, so the results are reproducible.
+Run the notebooks in order (01 → 02 → 03 → 04). Each one reads files written by the one before. Approximate run times on a 16-thread laptop: 03 ≈ 15 min, 04 ≈ 75–80 min. Keep the computer plugged in and stop it from sleeping during long runs. All steps use `random_state = 42`, so the results are reproducible.
 
 ## Using the final model (Stage 9 backend)
 

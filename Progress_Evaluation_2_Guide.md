@@ -9,16 +9,16 @@
 
 | Brief requirement | Where | Status |
 |---|---|---|
-| **Stage 6**: implement at least FOUR suitable algorithms | `03_Modelling` §3–4: 7 algorithms + mean baseline | ✔ |
+| **Stage 6**: implement at least FOUR suitable algorithms | `03_Modelling` §3–4: 5 algorithms (Linear Regression, Ridge, KNN, Random Forest, XGBoost) + mean baseline | ✔ |
 | Select algorithms appropriate to the problem | `03` §3 (justification table, 4 families) | ✔ |
 | Appropriate validation strategy | `03` §2: 5-fold CV on train only, same folds for all, test locked | ✔ |
 | Suitable performance metrics | `03` §2: RMSE (log) primary; MAE, R², $ errors, % within ±25% | ✔ |
 | Compare model performance systematically | `03` §5 table + chart, §7 fold-by-fold comparison | ✔ |
 | Record experiments, results, observations | `results/stage6_*.csv`, `03` §10 experiment log | ✔ |
 | Understand why models perform better or worse | `03` §6 over/under-fitting, §8 learning curves, residuals, segments | ✔ |
-| **Stage 7**: hyper-parameter tuning | `04_Optimisation` §3–5 (6 models tuned) | ✔ |
+| **Stage 7**: hyper-parameter tuning | `04_Optimisation` §3–5 (4 models tuned; Linear Regression has no hyper-parameters) | ✔ |
 | Appropriate optimisation / search strategy | `04` §2: grid vs randomised search, with reasons | ✔ |
-| Investigate feature selection / engineering / modelling choices | `04` §7: 12 ablation, feature-selection and ensemble experiments | ✔ |
+| Investigate feature selection / engineering / modelling choices | `04` §7: 11 ablation, feature-selection and ensemble experiments | ✔ |
 | Compare tuned models with baselines | `04` §6 | ✔ |
 | Select and justify the final model | `04` §8 (criteria table), §9 (test set, used once) | ✔ |
 | Interpretation of results | `04` §9–10 (errors by segment, permutation importance, partial dependence) | ✔ |
@@ -31,7 +31,7 @@
 
 | File | Purpose |
 |---|---|
-| `03_Modelling_Airbnb.ipynb` | Stage 6: compares 7 algorithms with default settings |
+| `03_Modelling_Airbnb.ipynb` | Stage 6: compares 5 algorithms with default settings |
 | `04_Optimisation_Airbnb.ipynb` | Stage 7: tuning, experiments, final model, test evaluation, saving |
 | `src/modelling.py` | Shared code: model catalogue, `make_pipeline`, metrics, leakage-safe CV loop |
 | `results/stage6_*.csv`, `results/stage7_*.csv` | Experiment records (every score in the notebooks) |
@@ -40,7 +40,7 @@
 | `models/final_model_metadata.json` | Settings, CV and test metrics, input fields, library versions |
 | `requirements.txt` | `xgboost` added |
 
-**Re-running:** `03` takes ≈ 25 min and `04` ≈ 75–90 min on a 16-thread laptop. Keep the laptop plugged in and stop it from sleeping, or the run pauses. Run `03` first, because `04` reads `results/stage6_cv_summary.csv`.
+**Re-running:** `03` takes ≈ 15 min and `04` ≈ 75–80 min on a 16-thread laptop. Keep the laptop plugged in and stop it from sleeping, or the run pauses. Run `03` first, because `04` reads `results/stage6_cv_summary.csv`.
 
 ---
 
@@ -51,15 +51,13 @@
 | Model | Family | Stage 6 CV RMSE (defaults) | Stage 7 CV RMSE (tuned) | Tuned R² | Test RMSE |
 |---|---|---|---|---|---|
 | **XGBoost (final)** | boosting | 0.3929 | **0.3834** | **0.716** | **0.3808** |
-| HistGradientBoosting | boosting | 0.3935 | 0.3866 | 0.711 | 0.3858 |
 | Random Forest | bagging | 0.3931 | 0.3922 | 0.703 | 0.3907 |
 | Linear Regression | linear | 0.4168 | – (no hyper-parameters) | 0.664 | 0.4165 |
 | Ridge | linear | 0.4172 | 0.4168 | 0.664 | 0.4165 |
-| Lasso | linear | 0.4183 | 0.4173 | 0.663 | 0.4170 |
 | KNN | instance-based | 0.4472 | 0.4283 | 0.645 | 0.4249 |
 | Mean baseline | – | 0.7191 | – | 0.000 | 0.7088 |
 
-**Final model on the test set:** RMSE 0.381 · R² 0.711 · MAE **$47.8** · median error **$21.5** · MAPE 28% · **59% of listings within ±25%** (mean baseline: 29%) · 37 ms per prediction · 10 MB file.
+**Final model on the test set:** RMSE 0.381 · R² 0.711 · MAE **$47.8** · median error **$21.5** · MAPE 28% · **59% of listings within ±25%** (mean baseline: 29%) · ~70 ms per prediction · 10 MB file.
 
 **Final XGBoost settings:** 1,257 trees · learning rate 0.022 · max depth 10 · min child weight 15 · subsample 0.84 · colsample_bytree 0.48 · L2 (lambda) 1.52 · L1 (alpha) 0.004.
 
@@ -68,7 +66,7 @@
 - Remove ratios / distance / neighbourhood encoding: no meaningful change for XGBoost. They are kept because they help the linear models and the form input.
 - Keep only the top 40 / top 20 features: **+0.004 / +0.021 (worse)**, so all features are kept.
 - Full feature set (reviews, host history): **−0.020 (better)**, but not available for new listings, so not used.
-- Ensembles (average of 2 or 3 tree models): −0.0004, so not adopted (rule: must gain > 0.005).
+- Ensemble (average of XGBoost and Random Forest): +0.0007 (slightly worse), so not adopted (rule: must gain > 0.005).
 
 **What drives the price (permutation importance):** room type ≫ location (neighbourhood, distance, coordinates) > amenities > bedrooms / guests / bathrooms.
 
@@ -95,7 +93,7 @@
 | § | Section | Status |
 |---|---|---|
 | 1–2 | Setup, search strategy | **COMPULSORY** |
-| 3–5 | Tuning (linear, KNN, tree ensembles) | **COMPULSORY** |
+| 3–5 | Tuning (Ridge, KNN, Random Forest, XGBoost) | **COMPULSORY** |
 | 6 | Tuned vs baseline | **COMPULSORY** |
 | 7a | Feature-engineering ablation | **COMPULSORY** ("investigate feature engineering") |
 | 7b | Feature set & amenity vocabulary | RECOMMENDED |
@@ -111,7 +109,13 @@
 
 ## 5. Likely viva questions (short answers)
 
-**Why these algorithms?** They cover four families with different assumptions. Linear models (OLS, Ridge, Lasso) are simple, interpretable baselines; Ridge handles correlated size features and Lasso does feature selection. KNN mirrors how hosts price against comparable listings. Bagging (Random Forest) and boosting (HistGB, XGBoost) capture the non-linear effects and interactions found in the EDA.
+**Why these five algorithms?** They cover four families with different assumptions, which tells us what kind of structure the data has:
+- **Linear Regression:** the simplest, fully interpretable reference.
+- **Ridge:** the same model with a penalty for correlated size features (accommodates / beds / bedrooms). It tests whether regularisation helps; it doesn't, because the problem is bias.
+- **KNN:** mirrors how hosts price against comparable listings.
+- **Random Forest (bagging) and XGBoost (boosting):** capture the non-linear effects and interactions found in the EDA, in two different ways (averaging independent trees vs correcting errors step by step).
+
+**Why only five? Why not Lasso or HistGradientBoosting?** The brief asks for at least four. Lasso is another linear model and HistGradientBoosting is another boosting model, so they repeat families we already cover without answering a new question.
 
 **Why RMSE on log price?** The model is trained on `log_price`. An error of 0.1 log units is about a 10% error, so it measures relative error and is fair to both cheap and expensive listings. Squaring penalises the large misses that matter most. We also report $ errors and "% within ±25%" for hosts.
 
@@ -127,9 +131,9 @@
 
 **Did feature engineering help?** Yes. Removing all engineered features worsens RMSE by 0.017, mostly because of the amenity flags. Some features (ratios, distance) add little to XGBoost because deep trees can rebuild them from raw inputs, but they help the linear models.
 
-**Did feature selection help?** No. Keeping only the top 40 or top 20 features made the model worse. The useful selection happened earlier: variance and correlation filters (Stage 4) and Lasso (embedded selection).
+**Did feature selection help?** No. Keeping only the top 40 or top 20 features made the model worse. The useful selection happened earlier: variance and correlation filters (Stage 4).
 
-**Why XGBoost and not an ensemble or HistGB?** It has the lowest CV error. Averaging models gained only 0.0004 (below our pre-set 0.005 threshold). HistGB is a close, smaller alternative, 0.003 behind.
+**Why XGBoost and not Random Forest or an ensemble?** XGBoost has the lowest CV error (0.383 vs 0.392). Random Forest is also 33× larger (816 MB) and about 2× slower per prediction. Averaging the two was slightly *worse* (+0.0007) because they make very similar errors, so it fails our pre-set rule (must gain > 0.005).
 
 **Is the model over-fitted?** No. Test RMSE (0.381) ≈ CV RMSE (0.383), and every model's test score is within 0.004 of its CV score.
 
@@ -148,4 +152,4 @@ The viva is individual, and "ability to explain the student's own contribution a
 | | | | |
 | | | | |
 
-Suggested split for four members: (1) validation design & metrics + linear models; (2) KNN + Random Forest + over-fitting / learning-curve analysis; (3) boosting models + tuning strategy & search; (4) ablation / feature selection + final selection, test evaluation & interpretation.
+Suggested split for four members: (1) validation design & metrics + linear models; (2) KNN + Random Forest + over-fitting / learning-curve analysis; (3) XGBoost + tuning strategy & search; (4) ablation / feature selection + final selection, test evaluation & interpretation.
