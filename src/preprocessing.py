@@ -135,7 +135,10 @@ def clean_and_engineer(df: pd.DataFrame) -> pd.DataFrame:
         out[c] = _col(df, c).astype(object)
     nbhd = _col(df, "neighbourhood").astype(object)
     # 19 neighbourhood names exist in more than one city -> make them unique per city
-    out["neighbourhood"] = [np.nan if pd.isna(n) else f"{c} | {n}" for c, n in zip(out["city"], nbhd)]
+    # dtype=object: if every value is missing (e.g. one backend request without a neighbourhood) pandas
+    # would otherwise make the column float and the LocationImputer could not write the inferred name into it
+    out["neighbourhood"] = pd.Series([np.nan if pd.isna(n) else f"{c} | {n}" for c, n in zip(out["city"], nbhd)],
+                                     index=df.index, dtype=object)
 
     # numeric
     for c in ["accommodates", "bathrooms", "bedrooms", "beds", "latitude", "longitude",

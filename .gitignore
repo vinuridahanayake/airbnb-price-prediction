@@ -5,6 +5,7 @@ Airbnb_Data.csv
 __pycache__/
 *.pyc
 .ipynb_checkpoints/
+.pytest_cache/
 .venv/
 venv/
 
@@ -16,3 +17,7 @@ _smoke_*.ipynb
 .DS_Store
 Thumbs.db
 .vscode/
+
+# Stage 10 frontend (rebuild with: cd frontend && npm install && npm run build)
+frontend/node_modules/
+frontend/dist/
