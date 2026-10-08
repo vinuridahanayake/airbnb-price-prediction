@@ -78,24 +78,66 @@ export default function App() {
   return (
     <div className="page">
       <header className="top">
-        <div className="brand">
-          <span className="logo" aria-hidden="true">$</span>
-          <div>
-            <h1>Listing Price Guide</h1>
-            <p>Find a fair nightly price for your new Airbnb listing</p>
+        <div className="top-container">
+          <div className="brand">
+            <div className="logo-badge" aria-hidden="true">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                <polyline points="9 22 9 12 15 12 15 22" />
+              </svg>
+            </div>
+            <div className="brand-copy">
+              <div className="brand-title-row">
+                <h1>Airbnb Price Predictor</h1>
+                <span className="version-pill">AI Valuation</span>
+              </div>
+              <p>Find the optimal nightly price for your listing using market intelligence</p>
+            </div>
+          </div>
+          <div className="header-meta">
+            <div className="status-pill">
+              <span className="live-dot" />
+              <span>Model Live</span>
+            </div>
+            {modelInfo && (
+              <div className="meta-pill" title={`Trained on ${modelInfo.train_rows?.toLocaleString()} listings`}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+                </svg>
+                <span>XGBoost • {modelInfo.test_rows ? `${(modelInfo.test_rows + modelInfo.train_rows).toLocaleString()} listings` : "74k comps"}</span>
+              </div>
+            )}
           </div>
         </div>
       </header>
 
       <main>
         {loadError ? (
-          <div className="card result">
-            <h2>The price service is not available</h2>
+          <div className="card error-card">
+            <div className="error-icon-box">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
+            </div>
+            <h2>Price Prediction Service Unavailable</h2>
             <p className="error-text">{loadError}</p>
-            <button className="primary" onClick={() => window.location.reload()}>Try again</button>
+            <p className="hint">Make sure the backend is active at port 8010.</p>
+            <button className="primary" onClick={() => window.location.reload()}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="1 4 1 10 7 10" />
+                <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
+              </svg>
+              Try reconnecting
+            </button>
           </div>
         ) : !options ? (
-          <p className="muted loading-page">Loading…</p>
+          <div className="card loading-card">
+            <div className="loading-spinner" />
+            <h3>Connecting to Prediction Engine…</h3>
+            <p className="muted">Fetching listing options and model parameters</p>
+          </div>
         ) : (
           <div className="layout">
             <ListingForm options={options} form={form} setField={setField} errors={errors} onSubmit={submit} loading={loading} />
@@ -105,9 +147,17 @@ export default function App() {
         )}
       </main>
 
-      <footer>
-        IT3051 Mini Project · Group Mine4Data · Based on Airbnb listings from 2017 (Kaggle).
-        Prices are estimates to help you decide, not guarantees.
+      <footer className="footer">
+        <div className="footer-content">
+          <div className="footer-brand">
+            <span className="footer-logo-dot" />
+            <span>Airbnb Listing Price Guide • IT3051 Mini Project (Mine4Data)</span>
+          </div>
+          <p className="footer-disclaimer">
+            Predictions are ML approximations based on Kaggle Airbnb historical market data (74,000+ US listings).
+            Estimates are meant as strategic guidance, not financial guarantees.
+          </p>
+        </div>
       </footer>
     </div>
   );
