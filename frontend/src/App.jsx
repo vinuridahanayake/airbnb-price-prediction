@@ -25,7 +25,6 @@ export default function App() {
 
   const setField = (field, value) => {
     setForm((f) => ({ ...f, [field]: value }));
-    // clear a field's error as soon as the user edits it
     const key = field === "latitude" || field === "longitude" ? "coordinates" : field;
     setErrors((e) => {
       if (!(key in e)) return e;
@@ -33,6 +32,36 @@ export default function App() {
       delete rest[key];
       return rest;
     });
+  };
+
+  const handleApplyPreset = (presetData) => {
+    setForm({ ...EMPTY_FORM, ...presetData });
+    setErrors({});
+  };
+
+  const handleReset = () => {
+    setForm(EMPTY_FORM);
+    setErrors({});
+    setResult(null);
+    setTips({ status: "idle", tips: [] });
+  };
+
+  const handleApplyTip = (tip) => {
+    const match = tip.label.match(/Add “([^”]+)”/);
+    if (match) {
+      const name = match[1];
+      if (!form.amenities.includes(name)) {
+        setField("amenities", [...form.amenities, name]);
+      }
+    } else if (tip.label.includes("Instant Book")) {
+      setField("instant_bookable", "yes");
+    } else if (tip.label.includes("Host one more guest")) {
+      const acc = Number(form.accommodates || 1) + 1;
+      setField("accommodates", String(Math.min(16, acc)));
+      if (form.beds !== "") {
+        setField("beds", String(Math.min(18, Number(form.beds || 1) + 1)));
+      }
+    }
   };
 
   async function submit() {
@@ -46,11 +75,10 @@ export default function App() {
     setResultError(null);
     try {
       const res = await predict(payload);
-      if (id !== requestId.current) return; // a newer request has started
+      if (id !== requestId.current) return;
       setResult(res);
       setSubmitted(JSON.stringify(payload));
-      // on phones the result sits below the form, so bring it into view
-      if (window.matchMedia("(max-width: 920px)").matches)
+      if (window.matchMedia("(max-width: 960px)").matches)
         requestAnimationFrame(() => document.querySelector(".result")?.scrollIntoView({ behavior: "smooth", block: "start" }));
       loadTips(payload, id);
     } catch (e) {
@@ -81,7 +109,7 @@ export default function App() {
         <div className="top-container">
           <div className="brand">
             <div className="logo-badge" aria-hidden="true">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
                 <polyline points="9 22 9 12 15 12 15 22" />
               </svg>
@@ -89,22 +117,25 @@ export default function App() {
             <div className="brand-copy">
               <div className="brand-title-row">
                 <h1>Airbnb Price Predictor</h1>
-                <span className="version-pill">AI Valuation</span>
+                <span className="version-pill">AI Valuation Engine</span>
               </div>
-              <p>Find the optimal nightly price for your listing using market intelligence</p>
+              <p>Predict fair market nightly prices and optimize revenue using machine learning</p>
             </div>
           </div>
           <div className="header-meta">
             <div className="status-pill">
               <span className="live-dot" />
-              <span>Model Live</span>
+              <span>Model Online</span>
             </div>
-            {modelInfo && (
-              <div className="meta-pill" title={`Trained on ${modelInfo.train_rows?.toLocaleString()} listings`}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-                </svg>
-                <span>XGBoost • {modelInfo.test_rows ? `${(modelInfo.test_rows + modelInfo.train_rows).toLocaleString()} listings` : "74k comps"}</span>
+            <div className="meta-pill">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+              </svg>
+              <span>XGBoost • 74k Comps</span>
+            </div>
+            {modelInfo?.test_metrics?.["MedAE ($)"] && (
+              <div className="meta-pill accuracy-pill">
+                <span>±${Math.round(modelInfo.test_metrics["MedAE ($)"])} MedAE</span>
               </div>
             )}
           </div>
@@ -115,7 +146,7 @@ export default function App() {
         {loadError ? (
           <div className="card error-card">
             <div className="error-icon-box">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="10" />
                 <line x1="12" y1="8" x2="12" y2="12" />
                 <line x1="12" y1="16" x2="12.01" y2="16" />
@@ -123,26 +154,39 @@ export default function App() {
             </div>
             <h2>Price Prediction Service Unavailable</h2>
             <p className="error-text">{loadError}</p>
-            <p className="hint">Make sure the backend is active at port 8010.</p>
+            <p className="hint">Ensure the backend server is running on port 8010.</p>
             <button className="primary" onClick={() => window.location.reload()}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="1 4 1 10 7 10" />
-                <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
-              </svg>
-              Try reconnecting
+              Reconnect
             </button>
           </div>
         ) : !options ? (
           <div className="card loading-card">
             <div className="loading-spinner" />
-            <h3>Connecting to Prediction Engine…</h3>
-            <p className="muted">Fetching listing options and model parameters</p>
+            <h3>Connecting to Valuation Engine…</h3>
+            <p className="muted">Loading market datasets, price ranges, and feature encoders</p>
           </div>
         ) : (
           <div className="layout">
-            <ListingForm options={options} form={form} setField={setField} errors={errors} onSubmit={submit} loading={loading} />
-            <ResultPanel result={result} loading={loading} error={resultError} stale={stale}
-              tips={tips} modelInfo={modelInfo} onRefresh={submit} />
+            <ListingForm
+              options={options}
+              form={form}
+              setField={setField}
+              errors={errors}
+              onSubmit={submit}
+              loading={loading}
+              onReset={handleReset}
+              onApplyPreset={handleApplyPreset}
+            />
+            <ResultPanel
+              result={result}
+              loading={loading}
+              error={resultError}
+              stale={stale}
+              tips={tips}
+              modelInfo={modelInfo}
+              onRefresh={submit}
+              onApplyTip={handleApplyTip}
+            />
           </div>
         )}
       </main>
@@ -151,11 +195,10 @@ export default function App() {
         <div className="footer-content">
           <div className="footer-brand">
             <span className="footer-logo-dot" />
-            <span>Airbnb Listing Price Guide • IT3051 Mini Project (Mine4Data)</span>
+            <span>Airbnb Price Predictor • Advanced Machine Learning Valuation System</span>
           </div>
           <p className="footer-disclaimer">
-            Predictions are ML approximations based on Kaggle Airbnb historical market data (74,000+ US listings).
-            Estimates are meant as strategic guidance, not financial guarantees.
+            Model trained on 74,000+ historical Airbnb US listings (Kaggle). Estimates serve as strategic pricing intelligence for hosts and investors.
           </p>
         </div>
       </footer>
